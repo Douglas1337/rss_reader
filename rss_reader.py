@@ -3,7 +3,6 @@ import feedparser
 import json
 from datetime import datetime
 
-
 def main():
     parser = argparse.ArgumentParser(prog='RSS Reader', description="RSS Reader using Python")
     parser.add_argument('source', metavar='source', type=str, help='Enter de RSS Source')
@@ -15,24 +14,25 @@ def main():
     limit = args.limit
     parsing(source, jsn, limit)
 
-
 # Data formating function
 def format_date(date_string):
     if date_string:
         return datetime(*date_string[:6]).strftime('%Y-%m-%d %H:%M:%S')
     return 'Date unavailable'
 
-
 def parsing(to_parse_url, is_json, limit):
     feed = to_parse_url
+
+    feed = feedparser.parse(feed)
+
     channel_info = {
-        'title': feed.feed.get('title', 'Title undefined'),
-        'link': feed.feed.get('link', 'Link undefined'),
-        'publish_date': format_date(feed.feed.get('published_parsed')),
-        'language': feed.feed.get('language', 'Language undefined'),
-        'managingEditor': feed.feed.get('managingEditor', 'Editor undefined'),
-        'last_build_date': format_date(feed.feed.get('updated_parsed')),
-        'categories': [cat['term'] for cat in feed.feed.get('tags', [])],
+        'title': feed.get('title', 'Title undefined'),
+        'link': feed.get('link', 'Link undefined'),
+        'publish_date': format_date(feed.get('published_parsed')),
+        'language': feed.get('language', 'Language undefined'),
+        'managingEditor': feed.get('managingEditor', 'Editor undefined'),
+        'last_build_date': format_date(feed.get('updated_parsed')),
+        'categories': [cat['term'] for cat in feed.get('tags', [])],
         'description': feed.feed.get('description', 'Description undefined')
     }
 
@@ -58,7 +58,6 @@ def parsing(to_parse_url, is_json, limit):
         with open(path, 'w') as file:
             file.write(res)
 
-
 def to_text(channel_info, feed_items):
     text = f"Título do Canal: {channel_info['title']}\n"
     text += f"Link do Canal: {channel_info['link']}\n"
@@ -78,9 +77,7 @@ def to_text(channel_info, feed_items):
         text += f"  Categorias: {', '.join(item['categories'])}\n"
         text += f"  Descrição: {item['description']}\n"
         text += "---\n"
-
     return text
-
 
 # Função para converter em JSON
 def to_json(channel_info, feed_items):
